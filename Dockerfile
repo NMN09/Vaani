@@ -1,5 +1,6 @@
 # Step 1: Build the Frontend
-FROM node:18-alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
+ENV CI=false
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
