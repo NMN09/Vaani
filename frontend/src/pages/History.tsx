@@ -7,14 +7,14 @@ export function History() {
   const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/calls')
+    fetch('/api/calls')
       .then(res => res.json())
       .then(data => setCalls(data));
   }, []);
 
   useEffect(() => {
     if (selectedCallId) {
-      fetch(`http://localhost:8000/api/calls/${selectedCallId}/messages`)
+      fetch(`/api/calls/${selectedCallId}/messages`)
         .then(res => res.json())
         .then(data => setMessages(data));
     }
@@ -23,7 +23,7 @@ export function History() {
   const handleClearHistory = async () => {
     if (!window.confirm("Are you sure you want to delete all call history? This cannot be undone.")) return;
     try {
-      const res = await fetch('http://localhost:8000/api/calls', { method: 'DELETE' });
+      const res = await fetch('/api/calls', { method: 'DELETE' });
       if (res.ok) {
         setCalls([]);
         setSelectedCallId(null);

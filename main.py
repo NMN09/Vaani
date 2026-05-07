@@ -271,16 +271,8 @@ async def voice_stream(websocket: WebSocket):
         def get_local_response(query: str, lang: str = "en-US"):
             query = query.lower()
             
-            # Localized fallbacks
-            fallbacks = {
-                "en-US": "I am VaaniAI, your Relationship Manager. I'm here to help you with Tractor Loans, Crop Insurance, KCC, Animal Husbandry, and Solar Pump subsidies. Could you please specify which of these you'd like to know more about?",
-                "hi-IN": "मैं वाणी एआई हूँ, आपकी रिलेशनशिप मैनेजर। मैं ट्रैक्टर लोन, फसल बीमा, केसीसी, पशुपालन और सोलर पंप सब्सिडी में आपकी मदद कर सकती हूँ। कृपया बताएं कि आप किसके बारे में जानना चाहते हैं?",
-                "kn-IN": "ನಾನು ವಾಣಿ ಎಐ, ನಿಮ್ಮ ರಿಲೇಶನ್‌ಶಿಪ್ ಮ್ಯಾನೇಜರ್. ಟ್ರ್ಯಾಕ್ಟರ್ ಸಾಲಗಳು, ಬೆಳೆ ವಿಮೆ, ಕೆಸಿಸಿ, ಪಶುಸಂಗೋಪನೆ ಮತ್ತು ಸೋಲಾರ್ ಪಂಪ್ ಸಬ್ಸಿಡಿಗಳ ಬಗ್ಗೆ ನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ. ಇವುಗಳಲ್ಲಿ ನೀವು ಯಾವುದರ ಬಗ್ಗೆ ತಿಳಿಯಲು ಬಯಸುತ್ತೀರಿ?"
-            }
-            
             # Match keywords and find policy
             for item in KB_DATA:
-                # Basic cross-language keyword detection (Title remains English, but query might be local)
                 if any(word in query for word in item["title"].lower().split()):
                     if lang == "hi-IN":
                         return f"हमारे {item['title']} पॉलिसी के आधार पर: {item['content']}"
@@ -288,7 +280,32 @@ async def voice_stream(websocket: WebSocket):
                         return f"{item['title']} ಪಾಲಿಸಿಯ ಆಧಾರದ ಮೇಲೆ: {item['content']}"
                     return f"Based on our {item['title']} policy: {item['content']}"
             
-            return fallbacks.get(lang, fallbacks["en-US"])
+            # Varied fallback responses (randomized to avoid repetition)
+            en_fb = [
+                "I am VaaniAI, your Relationship Manager. I can help with Tractor Loans, Crop Insurance, KCC, Animal Husbandry, and Solar Pump subsidies. What would you like to know?",
+                "Thank you for reaching out! I specialize in agricultural financial products like Tractor Loans, Crop Insurance, and Kisan Credit Card. Which interests you?",
+                "Happy to help! We offer Tractor Loans at 8.5%, Crop Insurance under PMFBY, KCC up to 3 Lakh, Dairy Loans, and Solar Pump subsidies. Tell me more about what you need.",
+                "Welcome! I can provide details on our agricultural loans, insurance schemes, and government subsidies. Please tell me which product you'd like to explore.",
+            ]
+            hi_fb = [
+                "मैं वाणी एआई हूँ Ji! ट्रैक्टर लोन, फसल बीमा, केसीसी, पशुपालन और सोलर पंप सब्सिडी में मदद कर सकती हूँ। किसके बारे में जानना चाहते हैं?",
+                "आपके सवाल के लिए शुक्रिया Ji! हमारे पास ट्रैक्टर लोन, PMFBY फसल बीमा, KCC और सोलर पंप सब्सिडी उपलब्ध है। कौन सा प्रोडक्ट जानना चाहेंगे?",
+                "Namaste Ji! कृपया बताइए कि ट्रैक्टर लोन, फसल बीमा, या किसान क्रेडिट कार्ड में से किसके बारे में जानना चाहते हैं?",
+            ]
+            kn_fb = [
+                "ನಾನು ವಾಣಿ ಎಐ. ಟ್ರ್ಯಾಕ್ಟರ್ ಸಾಲ, ಬೆಳೆ ವಿಮೆ, ಕೆಸಿಸಿ, ಪಶುಸಂಗೋಪನೆ ಮತ್ತು ಸೋಲಾರ್ ಪಂಪ್ ಸಬ್ಸಿಡಿ ಬಗ್ಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ. ಯಾವುದರ ಬಗ್ಗೆ ತಿಳಿಯಲು ಬಯಸುತ್ತೀರಿ?",
+                "ನಿಮ್ಮ ಪ್ರಶ್ನೆಗೆ ಧನ್ಯವಾದ! ಕೃಷಿ ಸಾಲ, PMFBY ವಿಮೆ, ಕೆಸಿಸಿ ಕಾರ್ಡ್ ಅಥವಾ PM-KUSUM ಸೋಲಾರ್ ಸಬ್ಸಿಡಿ ಬಗ್ಗೆ ತಿಳಿಸಿ.",
+            ]
+            
+            if lang == "hi-IN":
+                return random.choice(hi_fb)
+            elif lang == "kn-IN":
+                return random.choice(kn_fb)
+            return random.choice(en_fb)
+
+        # Conversation history for multi-turn context
+        MAX_HISTORY = 20
+        conversation_history = []
 
         while True:
             try:
@@ -315,17 +332,21 @@ async def voice_stream(websocket: WebSocket):
                         system_prompt = f"You are VaaniAI, a professional Relationship Manager for rural India. Answer the following query concisely and clearly in the {lang} language. Keep the response brief, around 1-3 sentences. Ensure you use respectful terms."
                         
                         ai_text = None
-                        print(f"Calling Gemini (1.5-flash) for {lang}: {text}")
+                        conversation_history.append({"role": "user", "parts": [{"text": text}]})
+                        print(f"Calling Gemini (2.0-flash) for {lang}: {text}")
                         try:
                             response = client.models.generate_content(
-                                model='gemini-1.5-flash',
-                                contents=[system_prompt, text]
+                                model='gemini-2.0-flash',
+                                contents=conversation_history[-MAX_HISTORY:],
+                                config={"system_instruction": system_prompt}
                             )
                             ai_text = response.text
+                            conversation_history.append({"role": "model", "parts": [{"text": ai_text}]})
                             print(f"Gemini Success: {ai_text}")
                         except Exception as gem_err:
-                            print(f"Gemini Error hit. Switching to Local Brain ({lang}).")
+                            print(f"Gemini Error [{type(gem_err).__name__}]: {gem_err}")
                             ai_text = get_local_response(text, lang)
+                            conversation_history.append({"role": "model", "parts": [{"text": ai_text}]})
                         
                         if ai_text:
                             if call_id:
@@ -351,17 +372,21 @@ async def voice_stream(websocket: WebSocket):
                         system_prompt = f"You are VaaniAI, a professional Relationship Manager for rural India. Answer the following query concisely and clearly in the {lang} language. Keep the response brief, around 1-3 sentences. Ensure you use respectful terms."
                         
                         ai_text = None
-                        print(f"Calling Gemini (1.5-flash) for {lang}: {text}")
+                        conversation_history.append({"role": "user", "parts": [{"text": text}]})
+                        print(f"Calling Gemini (2.0-flash) for {lang}: {text}")
                         try:
                             response = client.models.generate_content(
-                                model='gemini-1.5-flash',
-                                contents=[system_prompt, text]
+                                model='gemini-2.0-flash',
+                                contents=conversation_history[-MAX_HISTORY:],
+                                config={"system_instruction": system_prompt}
                             )
                             ai_text = response.text
+                            conversation_history.append({"role": "model", "parts": [{"text": ai_text}]})
                             print(f"Gemini Success: {ai_text}")
                         except Exception as gem_err:
-                            print(f"Gemini Error hit. Switching to Local Brain ({lang}).")
+                            print(f"Gemini Error [{type(gem_err).__name__}]: {gem_err}")
                             ai_text = get_local_response(text, lang)
+                            conversation_history.append({"role": "model", "parts": [{"text": ai_text}]})
                         
                         if ai_text:
                             if call_id:
@@ -388,3 +413,22 @@ async def voice_stream(websocket: WebSocket):
         print("Voice WebSocket disconnected")
     except Exception as e:
         print(f"Fatal error in voice_stream: {e}")
+
+# Serve Frontend - Must be at the end to not catch API routes
+FRONTEND_PATH = os.path.join(os.path.dirname(__file__), "frontend", "dist")
+
+if os.path.exists(FRONTEND_PATH):
+    app.mount("/", StaticFiles(directory=FRONTEND_PATH, html=True), name="frontend")
+    
+    # Optional: Catch-all for SPA routing (React Router)
+    @app.exception_handler(404)
+    async def not_found(request, exc):
+        from fastapi.responses import FileResponse
+        index_path = os.path.join(FRONTEND_PATH, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"error": "Not Found"}
+else:
+    @app.get("/")
+    async def root():
+        return {"status": "Backend running", "frontend": "Not built yet"}

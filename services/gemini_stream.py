@@ -181,7 +181,7 @@ async def handle_gemini_message(gemini_ws, json_str: str, current_lang_state: di
                     return None, current_lang_state["lang"]
                     
     except Exception as e:
-        print(f"Error in handle_gemini_message: {e}")
+        print(f"Error in handle_gemini_message [{type(e).__name__}]: {e}")
     return None, None
 
 async def send_tool_response(ws, call_id, name, response_data):

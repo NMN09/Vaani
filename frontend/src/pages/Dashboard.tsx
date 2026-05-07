@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ActiveCallFeed } from '../components/ActiveCallFeed';
 import { TranscriptView } from '../components/TranscriptView';
-import { LeadBadge } from '../components/LeadBadge';
-import { WatiAction } from '../components/WatiAction';
 import { PostCallSummary } from '../components/PostCallSummary';
 import { VoiceChat } from '../components/VoiceChat';
 import { PhoneOff, Activity, MessageCircle } from 'lucide-react';
@@ -20,7 +18,7 @@ export function Dashboard() {
   useEffect(() => {
     const fetchCalls = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/calls');
+        const res = await fetch('/api/calls');
         const data = await res.json();
         setCalls(data);
         if (data.length > 0 && !activeCallId) {
@@ -41,7 +39,7 @@ export function Dashboard() {
     
     const fetchMessages = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/calls/${activeCallId}/messages`);
+        const res = await fetch(`/api/calls/${activeCallId}/messages`);
         const data = await res.json();
         setMessages(data);
       } catch (e) { console.error("Poll messages error:", e); }
@@ -56,7 +54,7 @@ export function Dashboard() {
     setIsCallEnded(true);
     
     try {
-      const res = await fetch('http://localhost:8000/api/post-call', {
+      const res = await fetch('/api/post-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,11 +76,11 @@ export function Dashboard() {
 
   const handleSimulateCall = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/calls/simulate', { method: 'POST' });
+      const res = await fetch('/api/calls/simulate', { method: 'POST' });
       const data = await res.json();
       if (data.status === 'success') {
         // Refresh calls
-        const freshCalls = await fetch('http://localhost:8000/api/calls').then(r => r.json());
+        const freshCalls = await fetch('/api/calls').then(r => r.json());
         setCalls(freshCalls);
         setActiveCallId(data.call_id);
       }
@@ -94,7 +92,7 @@ export function Dashboard() {
   const handleSendWhatsApp = async () => {
     if (!activeCall) return;
     try {
-      const res = await fetch('http://localhost:8000/api/post-call', {
+      const res = await fetch('/api/post-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ call_id: activeCall.id })

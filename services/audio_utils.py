@@ -1,4 +1,7 @@
-import audioop
+try:
+    import audioop
+except ImportError:
+    import audioop_lts as audioop
 
 # Twilio operates at 8000 Hz, Gemini Live API expects 16000 Hz PCM16
 TWILIO_SAMPLE_RATE = 8000

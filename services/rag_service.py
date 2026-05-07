@@ -54,12 +54,12 @@ def query_knowledge_base(query: str, language: str = "English") -> str:
         prompt = f"Context:\n{context}\n\nQuery: {query}"
         
         response = client.models.generate_content(
-            model='gemini-3.1-pro', # High reasoning model
+            model='gemini-2.0-flash', # Using latest flash (gemini-3.1-pro does not exist)
             contents=prompt,
             config={"system_instruction": system_prompt}
         )
         
         return response.text
     except Exception as e:
-        print(f"RAG Error: {e}")
+        print(f"RAG Error [{type(e).__name__}]: {e}")
         return "Maaf kijiye Ji, abhi system mein kuch technical dikkat aa rahi hai."

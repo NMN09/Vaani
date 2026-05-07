@@ -2,7 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { decodeBase64ToBlob } from "../lib/audio";
 import { Mic, MicOff, Send } from "lucide-react";
 
-const WS_URL = `${import.meta.env.VITE_BACKEND_URL ?? "ws://localhost:8000"}/voice-stream`;
+const getWsUrl = () => {
+  if (import.meta.env.VITE_BACKEND_URL) return `${import.meta.env.VITE_BACKEND_URL}/voice-stream`;
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${window.location.host}/voice-stream`;
+};
+const WS_URL = getWsUrl();
 
 // For TypeScript
 declare global {

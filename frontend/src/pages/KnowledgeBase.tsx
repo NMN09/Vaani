@@ -9,7 +9,7 @@ export function KnowledgeBase() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchKb = () => {
-    fetch('http://localhost:8000/api/knowledge-base')
+    fetch('/api/knowledge-base')
       .then(res => res.json())
       .then(data => setKbItems(data));
   };
@@ -21,7 +21,7 @@ export function KnowledgeBase() {
   const handleAddKb = async () => {
     if (!newTitle || !newContent) return;
     try {
-      const res = await fetch('http://localhost:8000/api/knowledge-base', {
+      const res = await fetch('/api/knowledge-base', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: newTitle, content: newContent })
@@ -86,7 +86,7 @@ export function KnowledgeBase() {
                 </div>
               </div>
               <a 
-                href="http://localhost:8000/docs/crop_insurance.pdf" 
+                href="/docs/crop_insurance.pdf" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-xs font-bold text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
@@ -106,7 +106,7 @@ export function KnowledgeBase() {
                 </div>
               </div>
               <a 
-                href="http://localhost:8000/docs/kcc_policy.pdf" 
+                href="/docs/kcc_policy.pdf" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-xs font-bold text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
